@@ -28,7 +28,15 @@ namesOccurence <- daily_show_guests %>% group_by(raw_guest_list) %>% tally() %>%
 #Usuniecie dwoch pustych rekordow, chociaz to w sumie bez znaczenia
 namesOccurence <- namesOccurence[3:nrow(namesOccurence),]
 namesOccurence
+
+
 mostFamous <- namesOccurence %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences))
+
+#DODANIE BAR PLOTU POZIOMEGO
+namesOccurence %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences)) %>% 
+ggplot(aes(x=raw_guest_list, y=Number_of_Occurences)) +
+geom_bar(stat='identity') +
+coord_flip()
 
 #Dziala :D
 #mostFamous %>% print(n=Inf)
