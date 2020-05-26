@@ -34,3 +34,48 @@ mostFamous <- namesOccurence %>% top_n(20, Number_of_Occurences) %>% arrange(des
 #mostFamous %>% data.frame()
 
 
+
+
+#zamiana zeby pozbyc sie jednego levela media
+
+guests$group[guests$group == "media"] <- "Media"
+#typy danych
+guests$year <-as.numeric(guests$year)
+guests$month <-as.numeric(guests$month)
+guests$day <-as.numeric(guests$day)
+guests$group <-as.factor(guests$group)
+#probowanie coś z płcią
+guests$sex <- 1 * (str_sub(guests$imie, -1) == 'a')
+guests$sex[guests$sex == 1] <- 'K'
+guests$sex[guests$sex == 0] <- 'M'
+guests$sex <- 1 * ((str_sub(guests$imie, -1) == 'a') | str_detect(guests$google_knowledge_occupation, 'actress') | str_detect(guests$google_knowledge_occupation, 'lady'))
+summary(guests)
+guests$sex[guests$sex > 0] <- 'K'
+guests$sex[guests$sex == 0] <- 'M'
+#trzeba by było jakiś df z imionami bo inaczej to ciezko bedzie
+#mozna zrobić wykres dla pór roku np. najlepszy aktor czy coś
+guests$season[guests$month %in% c(12,1,2)] <- 'winter'
+guests$season[guests$month %in% c(6,7,8)] <- 'summer'
+guests$season[guests$month %in% c(9,10,11)] <- 'autumn'
+guests$season[guests$month %in% c(3,4,5)] <- 'spring'
+
+#wykres group od seasonów
+ggplot(guests, aes(x=group)) + geom_bar() + facet_wrap(~season) + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +xlab("") + ylab("")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
