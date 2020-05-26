@@ -11,7 +11,8 @@ guests <- separate(guests, col = c("raw_guest_list"), into = c("imie", "nazwisko
 
 #zmiana na 3 kolumny - rozdzielenie daty
 guests<-separate(guests, col = c("show"), into = c("year", "month", "day"), sep = "-", extra = "merge")
-
+#zeby pozbyc sie jednego levela
+guests$group[guests$group == "media"] <- "Media"
 guests$year <-as.numeric(guests$year)
 guests$month <-as.numeric(guests$month)
 guests$day <-as.numeric(guests$day)
@@ -33,17 +34,6 @@ mostFamous <- namesOccurence %>% top_n(20, Number_of_Occurences) %>% arrange(des
 #mostFamous %>% print(n=Inf)
 #mostFamous %>% data.frame()
 
-
-
-
-#zamiana zeby pozbyc sie jednego levela media
-
-guests$group[guests$group == "media"] <- "Media"
-#typy danych
-guests$year <-as.numeric(guests$year)
-guests$month <-as.numeric(guests$month)
-guests$day <-as.numeric(guests$day)
-guests$group <-as.factor(guests$group)
 #probowanie coś z płcią
 guests$sex <- 1 * (str_sub(guests$imie, -1) == 'a')
 guests$sex[guests$sex == 1] <- 'K'
