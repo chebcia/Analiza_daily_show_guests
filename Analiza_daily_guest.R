@@ -23,25 +23,26 @@ guests$group <-as.factor(guests$group)
 #write.csv(guests, file ="./guests.csv")
 #write.csv(daily_show_guests, file ="./notProcessed.csv")
 
+###########################################
+#Wyznaczenie najbardziej popularnych osob/zespolow
+
 #Policzenie ilosci wystapien poszczegolnych osob/zespolow i zmiana nazwy kolumny
 namesOccurence <- daily_show_guests %>% group_by(raw_guest_list) %>% tally() %>% rename(Number_of_Occurences = n)
-#namesOccurence
-#Usuniecie dwoch pustych rekordow, chociaz to w sumie bez znaczenia
+#Usuniecie dwoch pustych rekordow, chociaz to w sumie bez znaczenia dla tych danych
 namesOccurence <- namesOccurence[3:nrow(namesOccurence),]
 namesOccurence
 
 #Wybierze 20 najbardziej znanych. W przypadku kilku os�b o takim samym wyniku zostana ne dodatkowo dobrane - w przypadku top_n(20,) wyswietli 24 osoby
 mostFamous <- namesOccurence %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences))
 
+#mostFamous %>% print(n=Inf)
+###########################################
+
 #DODANIE BAR PLOTU POZIOMEGO
 namesOccurence %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences)) %>% 
 ggplot(aes(x=raw_guest_list, y=Number_of_Occurences)) +
 geom_bar(stat='identity') +
 coord_flip()
-
-#Dziala :D
-#mostFamous %>% print(n=Inf)
-#mostFamous %>% data.frame()
 
 
 #probowanie coś z płcią
@@ -64,8 +65,6 @@ ggplot(guests, aes(x=group)) + geom_bar() + facet_wrap(~season) + theme(axis.tex
 
 
 
-
-
 ###########################################
 #Special Events
 specialEvents <- daily_show_guests
@@ -79,3 +78,17 @@ specialEvents <- specialEvents[specialEvents$raw_guest_list != "None"
                                & specialEvents$raw_guest_list != "No Guest", ]
 specialEvents
 ###########################################
+
+
+
+###########################################
+#Most often used First Names
+mostPopularFNames <- daily_show_guests
+mostPopularFNames <- separate(mostPopularFNames, col = c("raw_guest_list"), into = c("fName"), sep = " ")
+mostPopularFNames <- mostPopularFNames %>% group_by(fName) %>% tally() %>% rename(Number_of_Occurences = n)
+#We consciously ignore the names of teams and institutions 
+#They are included in the general list, but so rare that they will not appear in this list
+mostPopularFNames <- mostPopularFNames %>% top_n(15, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences))
+mostPopularFNames
+###########################################
+
