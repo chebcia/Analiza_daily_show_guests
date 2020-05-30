@@ -25,11 +25,12 @@ guests$group <-as.factor(guests$group)
 
 #Policzenie ilosci wystapien poszczegolnych osob/zespolow i zmiana nazwy kolumny
 namesOccurence <- daily_show_guests %>% group_by(raw_guest_list) %>% tally() %>% rename(Number_of_Occurences = n)
+#namesOccurence
 #Usuniecie dwoch pustych rekordow, chociaz to w sumie bez znaczenia
 namesOccurence <- namesOccurence[3:nrow(namesOccurence),]
 namesOccurence
 
-
+#Wybierze 20 najbardziej znanych. W przypadku kilku os�b o takim samym wyniku zostana ne dodatkowo dobrane - w przypadku top_n(20,) wyswietli 24 osoby
 mostFamous <- namesOccurence %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences))
 
 #DODANIE BAR PLOTU POZIOMEGO
@@ -41,6 +42,7 @@ coord_flip()
 #Dziala :D
 #mostFamous %>% print(n=Inf)
 #mostFamous %>% data.frame()
+
 
 #probowanie coś z płcią
 guests$sex <- 1 * (str_sub(guests$imie, -1) == 'a')
@@ -64,16 +66,16 @@ ggplot(guests, aes(x=group)) + geom_bar() + facet_wrap(~season) + theme(axis.tex
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+###########################################
+#Special Events
+specialEvents <- daily_show_guests
+specialEvents
+specialEvents <- specialEvents %>% filter(is.na(google_knowledge_occupation))
+specialEvents <- specialEvents[specialEvents$raw_guest_list != "None" 
+                               & specialEvents$raw_guest_list != "none"
+                               & specialEvents$raw_guest_list != "no guest"
+                               & specialEvents$raw_guest_list != "no Guest"
+                               & specialEvents$raw_guest_list != "No guest"
+                               & specialEvents$raw_guest_list != "No Guest", ]
+specialEvents
+###########################################
