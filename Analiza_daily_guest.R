@@ -92,3 +92,17 @@ mostPopularFNames <- mostPopularFNames %>% top_n(15, Number_of_Occurences) %>% a
 mostPopularFNames
 ###########################################
 
+
+
+###########################################
+#Frequency of interviews
+frequency <- guests %>% group_by(day) %>% tally()
+#Delete 31st day of month, because of distortions on the chart
+#Should be [1:29] if we want to be very objective
+frequency <- frequency[1:30,]
+frequency %>% print(n=Inf)
+frequency %>% ggplot(aes(x=day, y=n)) + geom_bar(stat = 'identity')+geom_smooth()
+#Conclusion: Most of the interviews are conducted in the middle of the month
+
+#To samo mozna zrobic z uzyciem wlasnych funkcji (do przeksztalcenia miesiecy na kolejne dni w roku) dla pokazania czestotliwosci w przeciagu calego roku
+###########################################
