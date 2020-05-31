@@ -1,3 +1,4 @@
+library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(tibble)
@@ -77,6 +78,7 @@ specialEvents <- specialEvents[specialEvents$raw_guest_list != "None"
                                & specialEvents$raw_guest_list != "No guest"
                                & specialEvents$raw_guest_list != "No Guest", ]
 
+specialEvents <- specialEvents[,c(3,5)]
 specialEvents
 ###########################################
 
@@ -118,6 +120,21 @@ guests
 
 for (i in guests$month)
 {
+  # case_when(
+  #   i == 1 ~ mutate(guests, dayInYear = day),
+  #   i == 2 ~ mutate(guests, dayInYear = as.numeric(day) + 31),
+  #   i == 3 ~ mutate(guests, dayInYear = as.numeric(day) + 59),
+  #   i == 4 ~ mutate(guests, dayInYear = as.numeric(day) + 90),
+  #   i == 5 ~ mutate(guests, dayInYear = as.numeric(day) + 120),
+  #   i == 6 ~ mutate(guests, dayInYear = as.numeric(day) + 151),
+  #   i == 7 ~ mutate(guests, dayInYear = as.numeric(day) + 181),
+  #   i == 8 ~ mutate(guests, dayInYear = as.numeric(day) + 212),
+  #   i == 9 ~ mutate(guests, dayInYear = as.numeric(day) + 243),
+  #   i == 10 ~ mutate(guests, dayInYear = as.numeric(day) + 273),
+  #   i == 11 ~ mutate(guests, dayInYear = as.numeric(day) + 304),
+  #   i == 12 ~ mutate(guests, dayInYear = as.numeric(day) + 334)
+  # )
+  
   if(i == 1)
   {
     guests <- mutate(guests, dayInYear = day)
