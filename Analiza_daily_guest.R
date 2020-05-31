@@ -115,57 +115,73 @@ frequency %>% ggplot(aes(x=day, y=n)) + geom_bar(stat = 'identity')+geom_smooth(
 
 guests[,"dayInYear"] <- NA
 guests
-for(i in guests$month)
+
+for (i in guests$month)
 {
-  if(guests$month == 1)
+  if(i == 1)
   {
-    guests$dayInYear <- guests$day
+    guests <- mutate(guests, dayInYear = day)
+    #guests$dayInYear=guests$day
   }
-  else if(guests$moth == 2)
+  else if(i == 2)
   {
-    guests$dayInYear <- guests$day+31
+    guests <- mutate(guests, dayInYear = day + 31)
+    #guests$dayInYear = guests$day+31
   }
-  else if(guests$month == 3)
+  else if(i == 3)
   {
     #change to +28/29
-    guests$dayInYear <- guests$day+59
+    guests <- mutate(guests, dayInYear = day + 59)
+    #guests$dayInYear = guests$day+59
   }
-  else if(guests$month == 4)
+  else if(i == 4)
   {
-    guests$dayInYear <- guests$day+90
+    guests <- mutate(guests, dayInYear = day + 90)
+    #guests$dayInYear = guests$day+90
   }
-  else if(guests$month == 5)
+  else if(i == 5)
   {
-    guests$dayInYear <- guests$day+120
+    guests <- mutate(guests, dayInYear = day + 120)
+    #guests$dayInYear = guests$day+120
   }
-  else if(guests$month == 6)
+  else if(i == 6)
   {
-    guests$dayInYear <- guests$day+151
+    guests <- mutate(guests, dayInYear = day + 151)
+    #guests$dayInYear = guests$day+151
   }
-  else if(guests$month == 7)
+  else if(i == 7)
   {
-    guests$dayInYear <- guests$day+181
+    guests <- mutate(guests, dayInYear = day + 181)
+    #guests$dayInYear = guests$day+181
   }
-  else if(guests$month == 8)
+  else if(i == 8)
   {
-    guests$dayInYear <- guests$day+212
+    guests <- mutate(guests, dayInYear = day + 212)
+    #guests$dayInYear = guests$day+212
   }
-  else if(guests$month == 9)
+  else if(i == 9)
   {
-    guests$dayInYear <- guests$day+243
+    guests <- mutate(guests, dayInYear = day + 243)
+    #guests$dayInYear = guests$day+243
   }
-  else if(guests$month == 10)
+  else if(i == 10)
   {
-    guests$dayInYear <- guests$day+273
+    guests <- mutate(guests, dayInYear = day + 273)
+    #guests$dayInYear = guests$day+273
   }
-  else if(guests$month == 11)
+  else if(i == 11)
   {
-    guests$dayInYear <- guests$day+304
+    guests <- mutate(guests, dayInYear = day + 304)
+    #guests$dayInYear = guests$day+304
   }
   else
   {
-    guests$dayInYear <- guests$day+334
+    guests <- mutate(guests, dayInYear = day + 334)
+    #guests$dayInYear = guests$day+334
   }
 }
+guests
+#guests <- mutate(guests, dayInYear = day + 31)
 guests[guests$month == 2,]  
 ###########################################
+
