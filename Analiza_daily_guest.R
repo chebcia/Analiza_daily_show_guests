@@ -33,7 +33,7 @@ namesOccurence <- daily_show_guests %>% group_by(raw_guest_list) %>% tally() %>%
 namesOccurence <- namesOccurence[3:nrow(namesOccurence),]
 namesOccurence
 
-#Wybierze 20 najbardziej znanych. W przypadku kilku os�b o takim samym wyniku zostana ne dodatkowo dobrane - w przypadku top_n(20,) wyswietli 24 osoby
+#Wybierze 20 najbardziej znanych. W przypadku kilku osób o takim samym wyniku zostana ne dodatkowo dobrane - w przypadku top_n(20,) wyswietli 24 osoby
 mostFamous <- namesOccurence %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences))
 
 #mostFamous %>% print(n=Inf)
@@ -46,7 +46,7 @@ geom_bar(stat='identity') +
 coord_flip()
 
 
-#probowanie coś z płcią
+#probowanie coÅ› z pÅ‚ciÄ…
 guests$sex <- 1 * (str_sub(guests$imie, -1) == 'a')
 guests$sex[guests$sex == 1] <- 'K'
 guests$sex[guests$sex == 0] <- 'M'
@@ -54,14 +54,14 @@ guests$sex <- 1 * ((str_sub(guests$imie, -1) == 'a') | str_detect(guests$google_
 summary(guests)
 guests$sex[guests$sex > 0] <- 'K'
 guests$sex[guests$sex == 0] <- 'M'
-#trzeba by było jakiś df z imionami bo inaczej to ciezko bedzie
-#mozna zrobić wykres dla pór roku np. najlepszy aktor czy coś
+#trzeba by byÅ‚o jakiÅ› df z imionami bo inaczej to ciezko bedzie
+#mozna zrobiÄ‡ wykres dla pÃ³r roku np. najlepszy aktor czy coÅ›
 guests$season[guests$month %in% c(12,1,2)] <- 'winter'
 guests$season[guests$month %in% c(6,7,8)] <- 'summer'
 guests$season[guests$month %in% c(9,10,11)] <- 'autumn'
 guests$season[guests$month %in% c(3,4,5)] <- 'spring'
 
-#wykres group od seasonów
+#wykres group od seasonÃ³w
 ggplot(guests, aes(x=group)) + geom_bar() + facet_wrap(~season) + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +xlab("") + ylab("")
 
 
@@ -201,4 +201,27 @@ guests
 #guests <- mutate(guests, dayInYear = day + 31)
 guests[guests$month == 2,]  
 ###########################################
+#wykres różnych grup na przedziale lat
+df <- guests %>% group_by(group, year) %>% summarise( ilosc = n()) 
+#usunięcie grupy NA
+df <- na.omit(df) 
+
+ggplot(df, aes(fill=group, x=year, y=ilosc)) + 
+   geom_bar(position="stack", stat="identity") + 
+   scale_x_continuous(breaks = c(1999,2000,2001,2002,2003,2004,
+                                 2005,2006,2007,2008,2009,2010,2011,
+                                 2012,2013,2014,2015)) + 
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
+ggtitle("Występowanie różnych grup na przedziale lat")+
+   xlab("Rok")+
+   ylab("Ilość") + 
+   theme_test() +
+   theme(plot.title = element_text(size = 15,  face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold")) 
+  
+    
+    
+    
+    
 
