@@ -76,6 +76,7 @@ specialEvents <- specialEvents[specialEvents$raw_guest_list != "None"
                                & specialEvents$raw_guest_list != "no Guest"
                                & specialEvents$raw_guest_list != "No guest"
                                & specialEvents$raw_guest_list != "No Guest", ]
+
 specialEvents
 ###########################################
 
@@ -98,11 +99,73 @@ mostPopularFNames
 #Frequency of interviews
 frequency <- guests %>% group_by(day) %>% tally()
 #Delete 31st day of month, because of distortions on the chart
-#Should be [1:29] if we want to be very objective
+#Should be [1:28] if we want to be very objective
 frequency <- frequency[1:30,]
 frequency %>% print(n=Inf)
 frequency %>% ggplot(aes(x=day, y=n)) + geom_bar(stat = 'identity')+geom_smooth()
 #Conclusion: Most of the interviews are conducted in the middle of the month
 
 #To samo mozna zrobic z uzyciem wlasnych funkcji (do przeksztalcenia miesiecy na kolejne dni w roku) dla pokazania czestotliwosci w przeciagu calego roku
+###########################################
+
+
+
+###########################################
+#Year Frequency
+
+guests[,"dayInYear"] <- NA
+guests
+for(i in guests$month)
+{
+  if(guests$month == 1)
+  {
+    guests$dayInYear <- guests$day
+  }
+  else if(guests$moth == 2)
+  {
+    guests$dayInYear <- guests$day+31
+  }
+  else if(guests$month == 3)
+  {
+    #change to +28/29
+    guests$dayInYear <- guests$day+59
+  }
+  else if(guests$month == 4)
+  {
+    guests$dayInYear <- guests$day+90
+  }
+  else if(guests$month == 5)
+  {
+    guests$dayInYear <- guests$day+120
+  }
+  else if(guests$month == 6)
+  {
+    guests$dayInYear <- guests$day+151
+  }
+  else if(guests$month == 7)
+  {
+    guests$dayInYear <- guests$day+181
+  }
+  else if(guests$month == 8)
+  {
+    guests$dayInYear <- guests$day+212
+  }
+  else if(guests$month == 9)
+  {
+    guests$dayInYear <- guests$day+243
+  }
+  else if(guests$month == 10)
+  {
+    guests$dayInYear <- guests$day+273
+  }
+  else if(guests$month == 11)
+  {
+    guests$dayInYear <- guests$day+304
+  }
+  else
+  {
+    guests$dayInYear <- guests$day+334
+  }
+}
+guests[guests$month == 2,]  
 ###########################################
