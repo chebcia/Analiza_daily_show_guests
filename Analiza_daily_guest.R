@@ -224,3 +224,5 @@ Bandy%>% group_by(season) %>% summarise( ilosc = n()) %>% ggplot(aes(x=season, y
 
 
 
+
+
