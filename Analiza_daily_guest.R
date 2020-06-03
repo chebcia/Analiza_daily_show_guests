@@ -4,6 +4,7 @@ library(tidyr)
 library(tibble)
 library(fivethirtyeight)
 library(tidyverse)
+library(tidytext)
 guests<-daily_show_guests
 guests
 
@@ -17,6 +18,10 @@ guests$day <-as.numeric(guests$day)
 guests$group <-as.factor(guests$group)
 
 
+guests$season[guests$month %in% c(12,1,2)] <- 'winter'
+guests$season[guests$month %in% c(6,7,8)] <- 'summer'
+guests$season[guests$month %in% c(9,10,11)] <- 'autumn'
+guests$season[guests$month %in% c(3,4,5)] <- 'spring'
 
 
 ###########################################
@@ -30,10 +35,8 @@ specialEvents <- specialEvents[specialEvents$raw_guest_list != "None"
                                & specialEvents$raw_guest_list != "no Guest"
                                & specialEvents$raw_guest_list != "No guest"
                                & specialEvents$raw_guest_list != "No Guest", ]
-
 specialEvents <- specialEvents[,c(3,5)]
 specialEvents
-
 
 ###########################################
 #ANALIZA IMION
@@ -160,21 +163,11 @@ namesOccurencek %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_O
    coord_flip()
 
 
-
-
 ############################################################################################
-#seasons
-guests$season[guests$month %in% c(12,1,2)] <- 'winter'
-guests$season[guests$month %in% c(6,7,8)] <- 'summer'
-guests$season[guests$month %in% c(9,10,11)] <- 'autumn'
-guests$season[guests$month %in% c(3,4,5)] <- 'spring'
 
 #wykres group od seasonÃ³w
 ggplot(imionazenskie, aes(x=group)) + geom_bar() + facet_wrap(~season) + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +xlab("") + ylab("")
 ggplot(imionameskie, aes(x=group)) + geom_bar() + facet_wrap(~season) + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +xlab("") + ylab("")
-
-
-
 
 
 ###########################################
@@ -214,15 +207,29 @@ ggplot(df, aes(fill=group, x=year, y=ilosc)) +
 
 
 
-Bandy%>% group_by(season) %>% summarise( ilosc = n()) %>% ggplot(aes(x=season, y= ilosc)) + geom_col()  +xlab("Pory roku") + ylab("Ilość") +
+Bandy%>% group_by(season) %>% summarise( ilosc = n()) %>% arrange(desc(ilosc)) %>%
+ggplot(aes(x=season, y= ilosc)) + geom_col()  +xlab("Pory roku") + ylab("Ilość") +
    ggtitle("W którym sezonie było najwięcej zespołów")+
    theme_test() +
    theme(plot.title = element_text(size = 15,  face= 'bold', margin = ))+
    theme(axis.title.x = element_text( face="bold"))+
-   theme(axis.title.y= element_text( face="bold")) 
+   theme(axis.title.y= element_text( face="bold"))  +
+   scale_y_continuous(breaks = seq(from = 0, to = 10,by =2 )) 
+   
+
+
+imionazenskie %>% group_by(group) %>% summarise(ilosc = n()) %>% ggplot(aes(x=group, y=ilosc)) + geom_col() + 
+theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + xlab("")+
+   ylab("Ilość")  +  ggtitle("Ilosc kobiet w danej grupie") +  scale_y_continuous(breaks = seq(from = 0, to = 600,by =40 )) 
 
 
 
+imionameskie %>% group_by(group) %>% summarise(ilosc = n()) %>% ggplot(aes(x=group, y=ilosc)) + geom_col() + 
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + xlab("")+
+   ylab("Ilość") +  ggtitle("Ilosc mezczyzn w danej grupie") + scale_y_continuous(breaks = seq(from = 0, to = 600,by =40 )) 
 
 
+model <- lm(year~day + month + group ,data = guests)
+summary(model)
+plot(model)
 
