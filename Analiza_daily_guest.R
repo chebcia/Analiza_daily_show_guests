@@ -1,10 +1,16 @@
 library(ggplot2)
+#For ddply
+library(plyr)
+#plyr should be before dplyr
 library(dplyr)
 library(tidyr)
 library(tibble)
 library(fivethirtyeight)
 library(tidyverse)
 library(tidytext)
+#Do as.yearmoon()
+library(zoo)
+
 guests<-daily_show_guests
 guests
 
@@ -233,3 +239,36 @@ model <- lm(year~day + month + group ,data = guests)
 summary(model)
 plot(model)
 
+
+###########################################
+#zabijesz mnie za ten fragment XD
+
+interviewDate <- daily_show_guests
+interviewDate <- interviewDate %>% add_column(guests$month, guests$day)
+
+#dplyr::rename z powodu konfliktu z plyr
+interviewDate <- dplyr::rename(interviewDate, month=`guests$month`, day=`guests$day`, date=`show`)
+
+interviewDate <- interviewDate[,c(1,3,6,7)]
+interviewDate <- interviewDate[interviewDate$year >= 2005,]
+#Niepotrzebne, bo domyslnie jest w dobrym formacie
+#interviewDate$show <- as.Date(interviewDate$month)
+interviewDate$textMonth <- as.yearmon(interviewDate$date)
+interviewDate$textMonthF <- factor(interviewDate$textMonth)
+interviewDate$dayInYear <- as.Date(interviewDate$date,format='%Y-%m-%d')
+interviewDate$dayInYear <- lubridate::yday(interviewDate$dayInYear)
+interviewDate$weekDay <- weekdays(interviewDate$date)
+interviewDate$weekNumber <- strftime(interviewDate$date, format = "%V")
+
+interviewDate <- ddply(interviewDate,.(textMonthF),transform)
+
+
+topDay <- interviewDate %>% group_by(weekDay) %>% tally()
+topDay
+orderDays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+#Ciekawe wnioski - w soboty i niedziele nie bylo wywiadow
+#Wywiady w piatki to prawdziwa rzadkosc
+
+topDay[match(orderDays, topDay$weekDay),]
+#A Owczarek dobije x.x
+###########################################
