@@ -293,17 +293,12 @@ yearFrequency %>% ggplot(aes(x=year, y=n)) + geom_bar(stat = 'identity')
 
 ###########################################
 #Rozklad czestotliwosci wywiadow na przestrzeni roku
-#head(interviewDate)
-
-#Liczone wedlug zasady 1-1. 2-1, 3-1 itd.
-allFrequency1 <- interviewDate %>% group_by(day, month) %>% tally()
-#allFrequency1
-allFrequency1 <- allFrequency1 %>% unite("Day-Month", day, month, sep="-")
-#allFrequency1
-allFrequency1 %>% ggplot(aes(x=`Day-Month`, y=n)) + geom_bar(stat = 'identity')
-
 #Liczone wedlug numeru dnia w roku
-allFrequency2 <- interviewDate %>% group_by(dayInYear) %>% tally()
+allFrequency <- interviewDate %>% group_by(dayInYear) %>% tally()
 #allFrequency2
-allFrequency2 %>% ggplot(aes(x=dayInYear, y=n)) + geom_bar(stat = 'identity')
+allFrequency %>% ggplot(aes(x=dayInYear, y=n)) + geom_area()
+allFrequency
+spline.d <- as.data.frame(spline(allFrequency$dayInYear, allFrequency$n))
+allFrequency %>% ggplot(aes(x=dayInYear, y=n)) + geom_point() + geom_line(data = spline.d, aes(x = x, y = y))
+#Akurat wykresy srednie, ale dane dobre :)
 ###########################################
