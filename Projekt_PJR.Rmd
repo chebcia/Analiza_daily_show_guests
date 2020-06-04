@@ -134,10 +134,10 @@ tytul %>% group_by(tytul) %>% summarise( ilosc = n()) %>% ggplot(aes(x=tytul, y=
    theme(axis.title.y= element_text( face="bold")) 
 ```
 
-Wnioski jakieś
+Na podstawie danych można stwierdzić, że wśród osób pełniących ważne funkcje państwowe, bądź posiadające tytuły naukowe, najwięcej razy w programie gościły osoby będące senatorami. Na drugim miejscu byli to doktorzy, a na trzecim prezydenci.
 
 
-## Osoby z Jr.
+## Osoby z przedrostkiem Jr.
 
 Wydzielenie do nowej ramki danych Jr.
 ```{r}
@@ -146,8 +146,6 @@ guests3 <- guests3 %>% filter(!(str_detect(guests3$raw_guest_list, 'Jr.'  )))
 Juniory <- separate(Juniory, col = c("raw_guest_list"), into = c("imie", "nazwisko", "koncowka"), sep = " ", extra = "merge")
 
 ```
-
-Wnioski jakieś
 
 
 Wykres najpopularniejszych imion wsród Jr.
@@ -161,7 +159,7 @@ Juniory %>% group_by(imie) %>% summarise( ilosc = n()) %>% ggplot(aes(x=imie, y=
 
 ```
 
-Wnioski jakieś
+Wśród osób posiadających w nazwisku przedrostek "Jr." najwięcej z nich ma na imię Freddie, bądź Robert. Nie przynosi nam to żadnej konkretnej informacji, jednak zazwyczaj jest to tradycja praktykowana w konserwatywnych rodzinach. Posiadając większy zbiór danych można by było określić jakie najczęściej męskie imiona występują w konserwatywnych rodzinach w Stanach Zjednoczonych.
 
 
 ## Podwójne imiona
@@ -176,7 +174,7 @@ guests3 <- guests3 %>% filter(!(str_detect(guests3$raw_guest_list, ' & ' )   | s
 Wykres ilości z których była więcej niż jedna gwiazda
 ```{r}
 
-Andy%>% group_by(group) %>% summarise( ilosc = n()) %>% ggplot(aes(x=group, y= ilosc)) + geom_col() +xlab("Grupa") + ylab("IloÅ›Ä‡") +
+Andy%>% group_by(group) %>% summarise( ilosc = n()) %>% ggplot(aes(x=group, y= ilosc)) + geom_col() +xlab("Grupa") + ylab("Ilosc") +
    ggtitle("Z jakiej grupy byla wiecej niz jedna gwiazda")+
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
@@ -184,12 +182,12 @@ Andy%>% group_by(group) %>% summarise( ilosc = n()) %>% ggplot(aes(x=group, y= i
    theme(axis.title.y= element_text( face="bold"))  +  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 ```
 
-Wnioski jakieś
+Na podstawie analizy dziedziny, jaką zajmuje się osoba udzielająca wywiadu, można stwierdzić, że najbardziej popularni są aktorzy i osoby należące do grupy "Media".
 
 
 Wykres ilości w którym roku była więcej niż jedna gwiazda
 ```{r}
-Andy%>% group_by(year) %>% summarise( ilosc = n()) %>% ggplot(aes(x=year, y= ilosc)) + geom_col() +xlab("Grupa") + ylab("IloÅ›Ä‡") +
+Andy%>% group_by(year) %>% summarise( ilosc = n()) %>% ggplot(aes(x=year, y= ilosc)) + geom_col() +xlab("Grupa") + ylab("Ilosc") +
    ggtitle("W ktorym roku byla wiecej niz jedna gwiazda")+
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
@@ -216,7 +214,7 @@ Wykres ilości zespółów w danej porze roku
 ```{r}
 
 Bandy%>% group_by(season) %>% summarise( ilosc = n()) %>% arrange(desc(ilosc)) %>%
-   ggplot(aes(x=season, y= ilosc)) + geom_col()  +xlab("Pory roku") + ylab("IloÅ›Ä‡") +
+   ggplot(aes(x=season, y= ilosc)) + geom_col()  +xlab("Pory roku") + ylab("Ilosc") +
    ggtitle("W ktorym sezonie bylo najwiecej zespolow")+
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
@@ -338,7 +336,7 @@ Wnioski jakieś
 Wykres różnych grup na przedziale lat
 ```{r}
 df <- guests %>% group_by(group, year) %>% summarise( ilosc = n()) 
-#usuniÄ™cie grupy NA
+#usuniecie grupy NA
 df <- na.omit(df) 
 
 ggplot(df, aes(fill=group, x=year, y=ilosc)) + 
@@ -349,7 +347,7 @@ ggplot(df, aes(fill=group, x=year, y=ilosc)) +
    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
    ggtitle("Wystepowanie roznych grup na przedziale lat")+
    xlab("Rok")+
-   ylab("IloÅ›Ä‡") + 
+   ylab("Ilosc") + 
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5,  face= 'bold', margin = ))+
    theme(axis.title.x = element_text( face="bold"))+
@@ -358,11 +356,148 @@ ggplot(df, aes(fill=group, x=year, y=ilosc)) +
 ```
 
 
+## Ilość wywiadów na przestrzeni miesiąca
+
+
+```{r}
+frequency <- guests %>% group_by(day) %>% tally()
+#Delete 31st day of month, because of distortions on the chart
+#Should be [1:28] if we want to be very objective
+frequency <- frequency[1:30,]
+frequency %>% ggplot(aes(x=day, y=n)) + geom_bar(stat = 'identity')+geom_smooth()+
+   ggtitle("Ilosc wywiadow na przestrzeni miesiaca")+
+   xlab("Dzien miesiaca")+
+   ylab("Calkowita ilosc wywiadow") + 
+   theme_test() +
+   theme(plot.title = element_text(size = 15, hjust=0.5,  face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))
+```
+
+
+Ze względu na ilość dni w różnych miesiącach usnięto 31 pierwszy dzień, ponieważ sztucznie zaniżałby on ostatnie wskazanie na wykresie.
+Co prawda luty posiada 28 lub 29 dni, jednak jest to jedyny taki miesiąc w roku, dlatego ustawiony przedział wynosi 30 dni.
+
+Z wykresu wynika, że większość wywiadów jest przeprowadzana w pierwszych 20 dniach miesiąca. 
+
+
+
+## Ilość wywiadów na przestrzeni tygodnia
+
+
+Dzięki wykorzystaniu funkcji z pakietu Lubridate mogły zostać określone poszczególne dni tygodnia w jakich przeprowadzane były wywiady.
+
+
+```{r}
+interviewDate <- daily_show_guests
+interviewDate <- interviewDate %>% add_column(guests$month, guests$day)
+
+#dplyr::rename z powodu konfliktu z plyr
+interviewDate <- dplyr::rename(interviewDate, month=`guests$month`, day=`guests$day`, date=`show`)
+interviewDate <- interviewDate[,c(1,3,6,7)]
+
+interviewDate$textMonth <- as.yearmon(interviewDate$date)
+interviewDate$textMonthF <- factor(interviewDate$textMonth)
+interviewDate$dayInYear <- as.Date(interviewDate$date,format='%Y-%m-%d')
+interviewDate$dayInYear <- lubridate::yday(interviewDate$dayInYear)
+interviewDate$weekDay <- weekdays(interviewDate$date)
+interviewDate$weekNumber <- strftime(interviewDate$date, format = "%V")
+interviewDate <- ddply(interviewDate,.(textMonthF),transform)
+
+topDay <- interviewDate %>% group_by(weekDay) %>% tally()
+orderDays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Sunday")
+
+topDay <- topDay[match(orderDays, topDay$weekDay),]
+topDay
+```
+
+
+Na podstawie powyższych danych można zauważyć, że wywiady w piątki i niedziele to prawdziwa rzadkość. W niedzielę miał miejsce tylko jeden wywiad.
+Ciekawy jest również fakt, iż żaden z wywiadów nie został przeprowadzony w sobotę.
+
+
+
+## Ilość wywiadów w poszczególnych miesiącach
+
+
+
+```{r}
+monthlyFrequency <- interviewDate %>% group_by(month) %>% tally()
+monthlyFrequency %>% ggplot(aes(x=month, y=n)) + geom_bar(stat = 'identity') + 
+   ggtitle("Czestotliwosc wywiadow w poszczegolnych miesiacach") + 
+   xlab("Miesiac")+
+   ylab("Calkowita ilosc wywiadow") + 
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))
+```
+
+
+Na podstawie powyższego wykresu można zauważyć, że pod koniec roku przeprowadzana jest mniejsza ilość wywiadów.
+
+
+
+## Ilość wywiadów w poszczególnych latach
+
+
+
+```{r}
+yearFrequency <- interviewDate %>% group_by(year) %>% tally()
+yearFrequency %>% ggplot(aes(x=year, y=n)) + geom_bar(stat = 'identity') + 
+   ggtitle("Czestotliwosc wywiadow w poszczegolnych latach") + 
+   xlab("Rok")+
+   ylab("Calkowita ilosc wywiadow")+
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))
+```
+
+
+Na podstawie powyższego wykresu można zauważyć, że w roku 2015 przeprowadzono zdecydowanie mniej wywiadów. Jako że jest to ostatni rok uwzględniony w zbiorze danych można spodziewać się, że zbieranie danych zostało przerwane nie wraz z końcem roku, a w jego trakcie.
+Zostało to sprawdzone w trakcie wykonywania projektu - ostatni wywiad odbył się 5 sierpnia 2015 roku, co potwierdza powyższe przypuszczenia.
+
+
+
+## Ilość wywiadów w przeciągu roku
+
+
+
+```{r}
+allFrequency <- interviewDate %>% group_by(dayInYear) %>% tally()
+
+spline.d <- as.data.frame(spline(allFrequency$dayInYear, allFrequency$n))
+allFrequency %>% ggplot(aes(x=dayInYear, y=n)) + geom_point() + geom_line(data = spline.d, aes(x = x, y = y)) + 
+   ggtitle("Czestotliwosc wywiadow na przestrzeni roku") + 
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   xlab("Numer dnia w roku")+
+   ylab("Calkowita ilosc wywiadow")+
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))
+```
+
+
+Jeśli w danym dniu przeprowadzane są wywiady, to zazwyczaj jest ich 7-10 dziennie. 
+Kilkukrotnie w ciągu roku można zaobserwować większe spadki. Po wyliczeniu numeru dnia okazuje się, że spadki występują:
+<ul>
+<li> na początku stycznia </li>
+<li> pod koniec maja </li>
+<li> na początku lipca </li>
+<li> pod koniec sierpnia </li>
+<li> pod koniec listopada </li>
+<li> pod koniec roku. </li>
+</ul>
+Po porównaniu tych dat, okazuje się, że pokrywają one się w dużej mierze ze świętami w Stanach Zjednoczonych. O ile początek i koniec roku nie powinien nikogo dziwić, to okazuje się, że pod koniec maja w USA ma miejsce Memorial Day. Czwartego lipca ma miejsce Święto Niepodległości, a pod koniec listopada Święto Dziękczynienia. Niestety nie byliśmy w stanie znaleźć żadnego sensownego wytłumaczenia sierpniowego spadku.
+
+Podczas liczenia numeru dnia w roku został uwzględniony 29 luty.
 
 <br/>
 <br/>
+
  
-## Napisz coś tu Sosna zrobione do linijki 220 dopisz wnioski do kazdego z wykresów i dopisz do 300 linii
- 
+## Wnioski
+
+Na podstawie powyższych danych można przypusczać, że wywiady zostały przeprowadzane w Stanach Zjednoczonych. Oczywiście można to sprawdzić bezpośrednio wyszukując informacje o zbiorze daily_show_guests. 
+Ciekawy jest jednak fakt, iż można się tego dowiedzieć nie mając wiedzy skąd dane pochodzą.   
 
  

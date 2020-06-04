@@ -13,7 +13,6 @@ library(zoo)
 
 guests<-daily_show_guests
 
-
 #zmiana na 3 kolumny - rozdzielenie daty
 guests<-separate(guests, col = c("show"), into = c("year", "month", "day"), sep = "-", extra = "merge")
 #zeby pozbyc sie jednego levela
@@ -108,7 +107,7 @@ Andy%>% group_by(group) %>% summarise( ilosc = n()) %>% ggplot(aes(x=group, y= i
    theme(axis.title.x = element_text( face="bold"))+
    theme(axis.title.y= element_text( face="bold"))  +  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
-Andy%>% group_by(year) %>% summarise( ilosc = n()) %>% ggplot(aes(x=year, y= ilosc)) + geom_col() +xlab("Grupa") + ylab("IloÅ›Ä‡") +
+Andy%>% group_by(year) %>% summarise( ilosc = n()) %>% ggplot(aes(x=year, y= ilosc)) + geom_col() +xlab("Grupa") + ylab("Ilosc") +
    ggtitle("W ktorym roku byla wiecej niz jedna gwiazda")+
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
@@ -211,7 +210,7 @@ ggplot(df, aes(fill=group, x=year, y=ilosc)) +
    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
    ggtitle("Wystepowanie roznych grup na przedziale lat")+
    xlab("Rok")+
-   ylab("IloÅ›Ä‡") + 
+   ylab("Ilosc") + 
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5,  face= 'bold', margin = ))+
    theme(axis.title.x = element_text( face="bold"))+
@@ -224,16 +223,19 @@ frequency <- guests %>% group_by(day) %>% tally()
 #Delete 31st day of month, because of distortions on the chart
 #Should be [1:28] if we want to be very objective
 frequency <- frequency[1:30,]
-frequency %>% print(n=Inf)
-frequency %>% ggplot(aes(x=day, y=n)) + geom_bar(stat = 'identity')+geom_smooth()
-#Conclusion: Most of the interviews are conducted in the middle of the month
-
-#To samo mozna zrobic z uzyciem wlasnych funkcji (do przeksztalcenia miesiecy na kolejne dni w roku) dla pokazania czestotliwosci w przeciagu calego roku
+frequency %>% ggplot(aes(x=day, y=n)) + geom_bar(stat = 'identity')+geom_smooth()+
+   ggtitle("Ilosc wywiadow na przestrzeni miesiaca")+
+   xlab("Dzien miesiaca")+
+   ylab("Calkowita ilosc wywiadow") + 
+   theme_test() +
+   theme(plot.title = element_text(size = 15, hjust=0.5,  face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))
+###########################################
 
 
 ###########################################
-#zabijesz mnie za ten fragment XD
-
+#Amount of interviews in each day of a week
 interviewDate <- daily_show_guests
 interviewDate <- interviewDate %>% add_column(guests$month, guests$day)
 
@@ -257,49 +259,57 @@ interviewDate <- ddply(interviewDate,.(textMonthF),transform)
 
 topDay <- interviewDate %>% group_by(weekDay) %>% tally()
 topDay
-orderDays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
-#Ciekawe wnioski - w soboty i niedziele nie bylo wywiadow
-#Wywiady w piatki to prawdziwa rzadkosc
+orderDays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Sunday")
 
-topDay[match(orderDays, topDay$weekDay),]
-#A Owczarek dobije x.x
+topDay <- topDay[match(orderDays, topDay$weekDay),]
+topDay
 ###########################################
 
 
 
 ###########################################
-#Rozklad czestotliwosci wywiadow w poszczególnych miesiacach
+#Amount of interviews in each moth
 monthlyFrequency <- interviewDate %>% group_by(month) %>% tally()
 monthlyFrequency %>% ggplot(aes(x=month, y=n)) + geom_bar(stat = 'identity') + 
    ggtitle("Czestotliwosc wywiadow w poszczegolnych miesiacach") + 
-   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))
+   xlab("Miesiac")+
+   ylab("Calkowita ilosc wywiadow") + 
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))
 ###########################################
 
 
 ###########################################
-#Rozklad czestotliwosci wywiadow w poszczególnych latach
+#Amount of interviews in each year
 yearFrequency <- interviewDate %>% group_by(year) %>% tally()
 yearFrequency %>% ggplot(aes(x=year, y=n)) + geom_bar(stat = 'identity') + 
    ggtitle("Czestotliwosc wywiadow w poszczegolnych latach") + 
-   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))
+   xlab("Rok")+
+   ylab("Calkowita ilosc wywiadow")+
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))
 ###########################################
 
 
 
 ###########################################
-#Rozklad czestotliwosci wywiadow na przestrzeni roku
-#Liczone wedlug numeru dnia w roku
+#Amount of interviews during the year 
 allFrequency <- interviewDate %>% group_by(dayInYear) %>% tally()
-#allFrequency2
-allFrequency %>% ggplot(aes(x=dayInYear, y=n)) + geom_area() + 
-   ggtitle("Czestotliwosc wywiadow na przestrzeni roku") + 
-   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))
+# allFrequency %>% ggplot(aes(x=dayInYear, y=n)) + geom_area() + 
+#    ggtitle("Czestotliwosc wywiadow na przestrzeni roku") + 
+#    theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))
 
 spline.d <- as.data.frame(spline(allFrequency$dayInYear, allFrequency$n))
 allFrequency %>% ggplot(aes(x=dayInYear, y=n)) + geom_point() + geom_line(data = spline.d, aes(x = x, y = y)) + 
    ggtitle("Czestotliwosc wywiadow na przestrzeni roku") + 
-   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))
-#Akurat wykresy srednie, ale dane dobre :)
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   xlab("Numer dnia w roku")+
+   ylab("Calkowita ilosc wywiadow")+
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))
 ###########################################
 
 
