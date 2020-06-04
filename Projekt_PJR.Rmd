@@ -1,0 +1,368 @@
+---
+title: "Projekt Podstawy języka R - Dokumentacja"
+author: "Autorzy: Natalia Cheba, Michał Sosna"
+date: "Data sprawozdania: 04-06-2020"
+output: html_document
+---
+```{r, echo=FALSE, results=FALSE,message=FALSE}
+library(ggplot2)
+#For ddply
+library(plyr)
+#plyr should be before dplyr
+library(dplyr)
+library(tidyr)
+library(tibble)
+library(fivethirtyeight)
+library(tidyverse)
+library(tidytext)
+#Do as.yearmoon()
+library(zoo)
+guests<-daily_show_guests
+```
+
+## Czyszczenie danych
+
+Zamiana na 3 kolumny - rozdzielenie daty
+```{r}
+guests<-separate(guests, col = c("show"), into = c("year", "month", "day"), sep = "-", extra = "merge")
+```
+
+Zmiana podobnych zmiennych
+```{r}
+guests$group[guests$group == "media"] <- "Media"
+```
+
+Zamiana na odpowiednie typy zmiennych
+```{r}
+guests$year <-as.numeric(guests$year)
+guests$month <-as.numeric(guests$month)
+guests$day <-as.numeric(guests$day)
+guests$group <-as.factor(guests$group)
+```
+
+## Seasons
+
+Stworzenie dodatkowej kolumny season na podstawie miesięcy
+```{r}
+guests$season[guests$month %in% c(12,1,2)] <- 'winter'
+guests$season[guests$month %in% c(6,7,8)] <- 'summer'
+guests$season[guests$month %in% c(9,10,11)] <- 'autumn'
+guests$season[guests$month %in% c(3,4,5)] <- 'spring'
+
+```
+
+## Special Events
+
+Znalezienie specjalnych eventów i zapisanie ich do nowej zmiennej
+```{r}
+specialEvents <- daily_show_guests
+specialEvents <- specialEvents %>% filter(is.na(google_knowledge_occupation))
+specialEvents <- specialEvents[specialEvents$raw_guest_list != "None" 
+                               & specialEvents$raw_guest_list != "none"
+                               & specialEvents$raw_guest_list != "no guest"
+                               & specialEvents$raw_guest_list != "no Guest"
+                               & specialEvents$raw_guest_list != "No guest"
+                               & specialEvents$raw_guest_list != "No Guest", ]
+specialEvents <- specialEvents[,c(3,5)]
+specialEvents
+```
+
+## Analiza imion
+
+Filtrowanie
+```{r}
+guests2<-guests %>% filter(!is.na(google_knowledge_occupation)) 
+guests2 <- guests2[guests2$raw_guest_list != "(None)" 
+                   & guests2$raw_guest_list != "none"
+                   & guests2$raw_guest_list != "(no guest)"
+                   & guests2$raw_guest_list != "none"
+                   & guests2$raw_guest_list != "No guest"
+                   & guests2$raw_guest_list != "None", ]
+
+```
+ 
+ 
+ 
+Usunięcie z nowego zbioru rekordów zawierającej tytuły, nazwy zespołów i podwójne imiona
+```{r}
+#przypisanie do nowej zmiennej
+guests3 <- guests2 %>% filter(str_detect(guests2$raw_guest_list, ' & ') | str_detect(guests2$raw_guest_list, ' and ') | str_detect(guests2$raw_guest_list, ', ' ) | str_detect(guests2$raw_guest_list, 'Jr.' ) | str_detect(guests2$raw_guest_list, 'Dr. ' ) | str_detect(guests2$raw_guest_list, 'Rep.' ) | str_detect(guests2$raw_guest_list, 'Sen.' ) | str_detect(guests2$raw_guest_list, 'Senator' )| str_detect(guests2$google_knowledge_occupation, 'band' )| str_detect(guests2$raw_guest_list, 'Admiral' ) | str_detect(guests2$raw_guest_list, 'President' ))
+#usuwanie
+guests2 <- guests2 %>% filter(!(str_detect(guests2$raw_guest_list, ' & ') | str_detect(guests2$raw_guest_list, ' and ') | str_detect(guests2$raw_guest_list, ', ' ) | str_detect(guests2$raw_guest_list, 'Jr.' ) | str_detect(guests2$raw_guest_list, 'Dr. ' ) | str_detect(guests2$raw_guest_list, 'Rep.' ) | str_detect(guests2$raw_guest_list, 'Sen.' ) | str_detect(guests2$raw_guest_list, 'Senator' )| str_detect(guests2$google_knowledge_occupation, 'band' )| str_detect(guests2$raw_guest_list, 'Admiral' ) | str_detect(guests2$raw_guest_list, 'President' )))
+
+```
+Rozdzielenie z na imię i nazwisko
+```{r}
+guests2 <- separate(guests2, col = c("raw_guest_list"), into = c("imie", "nazwisko"), sep = " ", extra = "merge")
+
+```
+
+
+Przeniesienie do nowej ramki danych osób, które mogą być jako zespół - jednoczłonowe
+```{r}
+guests4 <- guests2 %>% filter(is.na(nazwisko))
+guests2 <- guests2 %>% filter(!(is.na(nazwisko)))
+```
+
+## Tytuły
+
+Znalezienie tytułów (Admiral, Sen., Senator, President, Dr. i Rep.) i usunięcie ich ze zbioru
+```{r}
+tytul <- guests3 %>% filter(str_detect(guests3$raw_guest_list, 'Sen.' ) | str_detect(guests3$raw_guest_list, 'Senator' )| str_detect(guests3$raw_guest_list, 'Admiral' ) | str_detect(guests3$raw_guest_list, 'President' )| str_detect(guests3$raw_guest_list, 'Dr. ') | str_detect(guests3$raw_guest_list, 'Rep. '))
+
+guests3 <- guests3 %>% filter(!(str_detect(guests3$raw_guest_list, 'Sen.' ) | str_detect(guests3$raw_guest_list, 'Senator' )| str_detect(guests3$raw_guest_list, 'Admiral' ) | str_detect(guests3$raw_guest_list, 'President' )| str_detect(guests3$raw_guest_list, 'Dr. ' ) | str_detect(guests3$raw_guest_list, 'Rep. ')))
+
+```
+
+Rozdzielenie kolumny na tytuł, imię i nazwisko
+```{r}
+tytul <- separate(tytul, col = c("raw_guest_list"), into = c("tytul", "imie", "nazwisko"), sep = " ", extra = "merge")
+```
+
+Zamiana Sen. na Senator
+```{r}
+tytul$tytul[tytul$tytul == "Sen."] <- "Senator"
+```
+
+Wykres ilości tytułów w zbiorze
+```{r}
+tytul %>% group_by(tytul) %>% summarise( ilosc = n()) %>% ggplot(aes(x=tytul, y= ilosc)) + geom_col() +xlab("Tytul") + ylab("Ilosc") +
+   ggtitle("Ilosc tytulow")+
+   theme_test() +
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold")) 
+```
+
+Wnioski jakieś
+
+
+## Osoby z Jr.
+
+Wydzielenie do nowej ramki danych Jr.
+```{r}
+Juniory <- guests3 %>% filter(str_detect(guests3$raw_guest_list, 'Jr.'  ))
+guests3 <- guests3 %>% filter(!(str_detect(guests3$raw_guest_list, 'Jr.'  )))
+Juniory <- separate(Juniory, col = c("raw_guest_list"), into = c("imie", "nazwisko", "koncowka"), sep = " ", extra = "merge")
+
+```
+
+Wnioski jakieś
+
+
+Wykres najpopularniejszych imion wsród Jr.
+```{r}
+Juniory %>% group_by(imie) %>% summarise( ilosc = n()) %>% ggplot(aes(x=imie, y= ilosc)) + geom_col() +xlab("Imie") + ylab("Ilosc") +
+   ggtitle("Najpopularniejsze imiona wsrod Jr.")+
+   theme_test() +
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold")) 
+
+```
+
+Wnioski jakieś
+
+
+## Podwójne imiona
+
+Znalezienie podwójnych imion
+```{r}
+Andy <- guests3 %>% filter(str_detect(guests3$raw_guest_list, ' & ' )   | str_detect(guests3$raw_guest_list, 'and' ))
+guests3 <- guests3 %>% filter(!(str_detect(guests3$raw_guest_list, ' & ' )   | str_detect(guests3$raw_guest_list, 'and' )))
+
+```
+
+Wykres ilości z których była więcej niż jedna gwiazda
+```{r}
+
+Andy%>% group_by(group) %>% summarise( ilosc = n()) %>% ggplot(aes(x=group, y= ilosc)) + geom_col() +xlab("Grupa") + ylab("IloÅ›Ä‡") +
+   ggtitle("Z jakiej grupy byla wiecej niz jedna gwiazda")+
+   theme_test() +
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))  +  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+```
+
+Wnioski jakieś
+
+
+Wykres ilości w którym roku była więcej niż jedna gwiazda
+```{r}
+Andy%>% group_by(year) %>% summarise( ilosc = n()) %>% ggplot(aes(x=year, y= ilosc)) + geom_col() +xlab("Grupa") + ylab("IloÅ›Ä‡") +
+   ggtitle("W ktorym roku byla wiecej niz jedna gwiazda")+
+   theme_test() +
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))  + coord_flip()
+
+```
+
+Wnioski jakieś
+
+
+## Zespoły
+
+Znalezienie zespołów
+```{r}
+Bandy<- guests3 %>% filter(str_detect(guests3$google_knowledge_occupation, 'band' ) )
+guests3<- guests3 %>% filter(!(str_detect(guests3$google_knowledge_occupation, 'band' ) ))
+Bandy
+
+
+```
+
+Wykres ilości zespółów w danej porze roku
+```{r}
+
+Bandy%>% group_by(season) %>% summarise( ilosc = n()) %>% arrange(desc(ilosc)) %>%
+   ggplot(aes(x=season, y= ilosc)) + geom_col()  +xlab("Pory roku") + ylab("IloÅ›Ä‡") +
+   ggtitle("W ktorym sezonie bylo najwiecej zespolow")+
+   theme_test() +
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))  +
+   scale_y_continuous(breaks = seq(from = 0, to = 10,by =2 )) 
+
+```
+
+
+## Imiona żeńskie i męskie
+
+Wczytanie imion żeńskich i męskich z pliku
+```{r}
+imionaz<- read_lines("data/first-names.txt")
+imionam<- read_lines("data/male-names.txt")
+```
+
+Wybranie tylko tych, które są większe niż 2
+```{r}
+imiona <- guests2  %>%  mutate(title_str = imie %>% str_replace_all("[^[:alnum:]]"," ")) %>% filter( str_length(title_str)>2)
+
+```
+
+Wybranie imion żeńskich
+```{r}
+imionazenskie<- imiona %>%
+   unnest_tokens(output = words, input = imie ) %>% 
+   filter(words %in% imionaz, is.na(as.numeric(words)))
+
+```
+
+Wybranie imion męskich
+```{r}
+imionameskie<- imiona %>%
+   unnest_tokens(output = words, input = imie ) %>% 
+   filter(words %in% imionam, is.na(as.numeric(words)))
+
+```
+
+Policzenie i wybranie 20 najbardziej popularnich imion męskich
+```{r}
+namesOccurencem <- imionameskie %>% group_by(title_str) %>% tally() %>% rename(Number_of_Occurences = n)
+mostFamousm <- namesOccurencem %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences))
+```
+
+Policzenie i wybranie 20 najbardziej popularnich imion żeńskich
+```{r}
+namesOccurencek <- imionazenskie %>% group_by(title_str) %>% tally() %>% rename(Number_of_Occurences = n)
+mostFamousk <- namesOccurencek %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences))
+```
+
+
+
+Wykres najpopularniejszych imion męskich
+```{r}
+namesOccurencem %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences)) %>% 
+   ggplot(aes(x=title_str, y=Number_of_Occurences)) +
+   geom_bar(stat='identity') +
+   coord_flip()
+
+```
+
+Wnioski jakieś
+
+
+Wykres najpopularniejszych imion żeńskich
+```{r}
+namesOccurencek %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences)) %>% 
+   ggplot(aes(x=title_str, y=Number_of_Occurences)) +
+   geom_bar(stat='identity') +
+   coord_flip()
+
+
+```
+
+Wnioski jakieś 
+
+Wykres ilości kobiet w danej grupie
+```{r}
+
+imionazenskie %>% group_by(group) %>% summarise(ilosc = n()) %>% ggplot(aes(x=group, y=ilosc)) + geom_col() + 
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + xlab("")+
+   ylab("Ilosc")  +  ggtitle("Ilosc kobiet w danej grupie") + theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = )) + scale_y_continuous(breaks = seq(from = 0, to = 600,by =40 )) 
+
+
+
+```
+
+Wnioski jakieś
+
+Wykres ilości mężczyzn w danej grupie
+```{r}
+imionameskie %>% group_by(group) %>% summarise(ilosc = n()) %>% ggplot(aes(x=group, y=ilosc)) + geom_col() + 
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + xlab("")+
+   ylab("Ilosc") +  ggtitle("Ilosc mezczyzn w danej grupie") + theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = )) + scale_y_continuous(breaks = seq(from = 0, to = 600,by =40 )) 
+
+```
+
+Wnioski jakieś 
+
+Wykres kobiet w danej grupie w określonej porze roku
+```{r}
+ggplot(imionazenskie, aes(x=group)) + geom_bar() + facet_wrap(~season) + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +xlab("") + ylab("")
+
+```
+
+Wnioski jakieś
+
+Wykres mężczyzn w danej grupie w określonej porze roku
+```{r}
+ggplot(imionameskie, aes(x=group)) + geom_bar() + facet_wrap(~season) + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +xlab("") + ylab("")
+
+```
+
+Wnioski jakieś 
+
+
+Wykres różnych grup na przedziale lat
+```{r}
+df <- guests %>% group_by(group, year) %>% summarise( ilosc = n()) 
+#usuniÄ™cie grupy NA
+df <- na.omit(df) 
+
+ggplot(df, aes(fill=group, x=year, y=ilosc)) + 
+   geom_bar(position="stack", stat="identity") + 
+   scale_x_continuous(breaks = c(1999,2000,2001,2002,2003,2004,
+                                 2005,2006,2007,2008,2009,2010,2011,
+                                 2012,2013,2014,2015)) + 
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
+   ggtitle("Wystepowanie roznych grup na przedziale lat")+
+   xlab("Rok")+
+   ylab("IloÅ›Ä‡") + 
+   theme_test() +
+   theme(plot.title = element_text(size = 15, hjust=0.5,  face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold")) 
+
+```
+
+
+
+<br/>
+<br/>
+ 
+## Napisz coś tu Sosna zrobione do linijki 220 dopisz wnioski do kazdego z wykresów i dopisz do 300 linii
+ 
+
+ 
