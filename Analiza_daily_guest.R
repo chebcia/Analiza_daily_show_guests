@@ -133,7 +133,7 @@ Bandy%>% group_by(season) %>% summarise( ilosc = n()) %>% arrange(desc(ilosc)) %
 
 
 #imiona zenskie
-imionaz<- read_lines("data/first-names.txt")
+imionaz<- read_lines("data/female-names.txt")
 imionam<- read_lines("data/male-names.txt")
 
 #tylko Ci co majÄ… imiÄ™ wiÄ™ksze niÅ¼ 2
