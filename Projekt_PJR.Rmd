@@ -1,7 +1,7 @@
 ---
 title: "Projekt Podstawy języka R - Dokumentacja"
 author: "Autorzy: Natalia Cheba, Michał Sosna"
-date: "Data sprawozdania: 04-06-2020"
+date: "Data sprawozdania: 05-06-2020"
 output: html_document
 ---
 <style>
