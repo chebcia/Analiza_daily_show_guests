@@ -70,10 +70,10 @@ guests3 <- guests3 %>% filter(!(str_detect(guests3$raw_guest_list, 'Sen.' ) | st
 
 
 tytul <- separate(tytul, col = c("raw_guest_list"), into = c("tytul", "imie", "nazwisko"), sep = " ", extra = "merge")
-#Wykres ludzi z tytuÅ‚ami 
+#Wykres ludzi z tytulami
 
 tytul$tytul[tytul$tytul == "Sen."] <- "Senator"
-#wykres ilosci tytuÅ‚Ã³w
+#wykres ilosci tytulow
 
 tytul %>% group_by(tytul) %>% summarise( ilosc = n()) %>% ggplot(aes(x=tytul, y= ilosc)) + geom_col() +xlab("Tytul") + ylab("Ilosc") +
    ggtitle("Ilosc tytulow")+
@@ -100,14 +100,14 @@ guests3 <- guests3 %>% filter(!(str_detect(guests3$raw_guest_list, ' & ' )   | s
 
 
 
-Andy%>% group_by(group) %>% summarise( ilosc = n()) %>% ggplot(aes(x=group, y= ilosc)) + geom_col() +xlab("Grupa") + ylab("IloÅ›Ä‡") +
+Andy%>% group_by(group) %>% summarise( ilosc = n()) %>% ggplot(aes(x=group, y= ilosc)) + geom_col() +xlab("Grupa") + ylab("Ilosc") +
    ggtitle("Z jakiej grupy byla wiecej niz jedna gwiazda")+
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
    theme(axis.title.x = element_text( face="bold"))+
    theme(axis.title.y= element_text( face="bold"))  +  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
-Andy%>% group_by(year) %>% summarise( ilosc = n()) %>% ggplot(aes(x=year, y= ilosc)) + geom_col() +xlab("Grupa") + ylab("Ilosc") +
+Andy%>% group_by(year) %>% summarise( ilosc = n()) %>% ggplot(aes(x=year, y= ilosc)) + geom_col() +xlab("Rok") + ylab("Ilosc") +
    ggtitle("W ktorym roku byla wiecej niz jedna gwiazda")+
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
@@ -119,9 +119,8 @@ Bandy<- guests3 %>% filter(str_detect(guests3$google_knowledge_occupation, 'band
 guests3<- guests3 %>% filter(!(str_detect(guests3$google_knowledge_occupation, 'band' ) ))
 
 
-
 Bandy%>% group_by(season) %>% summarise( ilosc = n()) %>% arrange(desc(ilosc)) %>%
-   ggplot(aes(x=season, y= ilosc)) + geom_col()  +xlab("Pory roku") + ylab("IloÅ›Ä‡") +
+   ggplot(aes(x=season, y= ilosc)) + geom_col()  +xlab("Pory roku") + ylab("Ilosc") +
    ggtitle("W ktorym sezonie bylo najwiecej zespolow")+
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
@@ -130,10 +129,9 @@ Bandy%>% group_by(season) %>% summarise( ilosc = n()) %>% arrange(desc(ilosc)) %
    scale_y_continuous(breaks = seq(from = 0, to = 10,by =2 )) 
 
 
-
-
-#imiona zenskie
+#Imiona zenskie
 imionaz<- read_lines("data/female-names.txt")
+#Imiona meskie
 imionam<- read_lines("data/male-names.txt")
 
 #tylko Ci co majÄ… imiÄ™ wiÄ™ksze niÅ¼ 2
@@ -157,7 +155,6 @@ imionameskie<- imiona %>%
 #Policzenie ilosci wystapien poszczegolnych osob/zespolow i zmiana nazwy kolumny
 namesOccurencem <- imionameskie %>% group_by(title_str) %>% tally() %>% rename(Number_of_Occurences = n)
 namesOccurencek <- imionazenskie %>% group_by(title_str) %>% tally() %>% rename(Number_of_Occurences = n)
-#Usuniecie dwoch pustych rekordow, chociaz to w sumie bez znaczenia dla tych danych
 
 
 #Wybierze 20 najbardziej znanych. W przypadku kilku osÃ³b o takim samym wyniku zostana ne dodatkowo dobrane - w przypadku top_n(20,) wyswietli 24 osoby
@@ -170,31 +167,48 @@ mostFamousk <- namesOccurencek %>% top_n(20, Number_of_Occurences) %>% arrange(d
 namesOccurencem %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences)) %>% 
    ggplot(aes(x=title_str, y=Number_of_Occurences)) +
    geom_bar(stat='identity') +
-   coord_flip()
+   coord_flip()+
+   ggtitle("Najczesciej wystepujace imiona meskie")+
+   xlab("Imiona") + ylab("Ilosc wystapien") +
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))
 
 namesOccurencek %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences)) %>% 
    ggplot(aes(x=title_str, y=Number_of_Occurences)) +
    geom_bar(stat='identity') +
-   coord_flip()
+   coord_flip()+
+   ggtitle("Najczesciej wystepujace imiona meskie")+
+   xlab("Imiona") + ylab("Ilosc wystapien")+
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))
 
 
 imionazenskie %>% group_by(group) %>% summarise(ilosc = n()) %>% ggplot(aes(x=group, y=ilosc)) + geom_col() + 
-   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + xlab("")+
-   ylab("Ilosc")  +  ggtitle("Ilosc kobiet w danej grupie") + theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = )) + scale_y_continuous(breaks = seq(from = 0, to = 600,by =40 )) 
-
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + xlab("Ilosc")+
+   ylab("Ilosc")  +  ggtitle("Udzial danej grupy wsrod kobiet") + theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = )) + scale_y_continuous(breaks = seq(from = 0, to = 600,by =40 )) 
 
 
 imionameskie %>% group_by(group) %>% summarise(ilosc = n()) %>% ggplot(aes(x=group, y=ilosc)) + geom_col() + 
-   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + xlab("")+
-   ylab("Ilosc") +  ggtitle("Ilosc mezczyzn w danej grupie") + theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = )) + scale_y_continuous(breaks = seq(from = 0, to = 600,by =40 )) 
-
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + xlab("Ilosc")+
+   ylab("Ilosc") +  ggtitle("Udzial danej grupy wsrod mezczyzn") + theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = )) + scale_y_continuous(breaks = seq(from = 0, to = 600,by =40 )) 
 
 
 ############################################################################################
 
-#wykres group od seasonÃƒÂ³w
-ggplot(imionazenskie, aes(x=group)) + geom_bar() + facet_wrap(~season) + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +xlab("") + ylab("")
-ggplot(imionameskie, aes(x=group)) + geom_bar() + facet_wrap(~season) + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +xlab("") + ylab("")
+#wykres group od seasonow
+ggplot(imionazenskie, aes(x=group)) + geom_bar() + 
+   facet_wrap(~season) + ggtitle("Ilosc wywiadow w poszczegolnych porach roku wsrod kobiet") + 
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+   xlab("") + ylab("Ilosc")
+
+ggplot(imionameskie, aes(x=group)) + geom_bar() +
+   facet_wrap(~season) + ggtitle("Ilosc wywiadow w poszczegolnych porach roku wsrod mezczyzn") +
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+   xlab("") + ylab("Ilosc")
 
 
 #wykres rÃ³Å¼nych grup na przedziale lat
@@ -213,7 +227,7 @@ ggplot(df, aes(fill=group, x=year, y=ilosc)) +
    ylab("Ilosc") + 
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5,  face= 'bold', margin = ))+
-   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
    theme(axis.title.y= element_text( face="bold")) 
 
 

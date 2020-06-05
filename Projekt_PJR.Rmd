@@ -4,6 +4,16 @@ author: "Autorzy: Natalia Cheba, Michał Sosna"
 date: "Data sprawozdania: 04-06-2020"
 output: html_document
 ---
+<style>
+body {
+text-align: justify}
+</style>
+
+
+## Wprowadzenie
+
+Celem projektu jest eksploracja danych o wywiadach przeprowadzonych w programie The Daily Show w latach 1999-2015.
+
 ```{r, echo=FALSE, results=FALSE,message=FALSE}
 library(ggplot2)
 #For ddply
@@ -40,6 +50,7 @@ guests$day <-as.numeric(guests$day)
 guests$group <-as.factor(guests$group)
 ```
 
+
 ## Seasons
 
 Stworzenie dodatkowej kolumny season na podstawie miesięcy
@@ -50,6 +61,7 @@ guests$season[guests$month %in% c(9,10,11)] <- 'autumn'
 guests$season[guests$month %in% c(3,4,5)] <- 'spring'
 
 ```
+
 
 ## Special Events
 
@@ -67,6 +79,7 @@ specialEvents <- specialEvents[,c(3,5)]
 specialEvents
 ```
 
+
 ## Analiza imion
 
 Filtrowanie
@@ -80,9 +93,7 @@ guests2 <- guests2[guests2$raw_guest_list != "(None)"
                    & guests2$raw_guest_list != "None", ]
 
 ```
- 
- 
- 
+
 Usunięcie z nowego zbioru rekordów zawierającej tytuły, nazwy zespołów i podwójne imiona
 ```{r}
 #przypisanie do nowej zmiennej
@@ -91,18 +102,19 @@ guests3 <- guests2 %>% filter(str_detect(guests2$raw_guest_list, ' & ') | str_de
 guests2 <- guests2 %>% filter(!(str_detect(guests2$raw_guest_list, ' & ') | str_detect(guests2$raw_guest_list, ' and ') | str_detect(guests2$raw_guest_list, ', ' ) | str_detect(guests2$raw_guest_list, 'Jr.' ) | str_detect(guests2$raw_guest_list, 'Dr. ' ) | str_detect(guests2$raw_guest_list, 'Rep.' ) | str_detect(guests2$raw_guest_list, 'Sen.' ) | str_detect(guests2$raw_guest_list, 'Senator' )| str_detect(guests2$google_knowledge_occupation, 'band' )| str_detect(guests2$raw_guest_list, 'Admiral' ) | str_detect(guests2$raw_guest_list, 'President' )))
 
 ```
-Rozdzielenie z na imię i nazwisko
+
+Rozdzielenie na imię i nazwisko
 ```{r}
 guests2 <- separate(guests2, col = c("raw_guest_list"), into = c("imie", "nazwisko"), sep = " ", extra = "merge")
 
 ```
-
 
 Przeniesienie do nowej ramki danych osób, które mogą być jako zespół - jednoczłonowe
 ```{r}
 guests4 <- guests2 %>% filter(is.na(nazwisko))
 guests2 <- guests2 %>% filter(!(is.na(nazwisko)))
 ```
+
 
 ## Tytuły
 
@@ -147,7 +159,6 @@ Juniory <- separate(Juniory, col = c("raw_guest_list"), into = c("imie", "nazwis
 
 ```
 
-
 Wykres najpopularniejszych imion wsród Jr.
 ```{r}
 Juniory %>% group_by(imie) %>% summarise( ilosc = n()) %>% ggplot(aes(x=imie, y= ilosc)) + geom_col() +xlab("Imie") + ylab("Ilosc") +
@@ -184,10 +195,9 @@ Andy%>% group_by(group) %>% summarise( ilosc = n()) %>% ggplot(aes(x=group, y= i
 
 Na podstawie analizy dziedziny, jaką zajmuje się osoba udzielająca wywiadu, można stwierdzić, że najbardziej popularni są aktorzy i osoby należące do grupy "Media".
 
-
 Wykres ilości w którym roku była więcej niż jedna gwiazda
 ```{r}
-Andy%>% group_by(year) %>% summarise( ilosc = n()) %>% ggplot(aes(x=year, y= ilosc)) + geom_col() +xlab("Grupa") + ylab("Ilosc") +
+Andy%>% group_by(year) %>% summarise( ilosc = n()) %>% ggplot(aes(x=year, y= ilosc)) + geom_col() +xlab("Rok") + ylab("Ilosc") +
    ggtitle("W ktorym roku byla wiecej niz jedna gwiazda")+
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
@@ -196,7 +206,7 @@ Andy%>% group_by(year) %>% summarise( ilosc = n()) %>% ggplot(aes(x=year, y= ilo
 
 ```
 
-Wnioski jakieś
+Najwięcej wywiadów ze sławnymi ludźmi miało miejsce w latach 2000, 2012, 2013 i 2014.
 
 
 ## Zespoły
@@ -267,71 +277,77 @@ namesOccurencek <- imionazenskie %>% group_by(title_str) %>% tally() %>% rename(
 mostFamousk <- namesOccurencek %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences))
 ```
 
-
-
 Wykres najpopularniejszych imion męskich
 ```{r}
 namesOccurencem %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences)) %>% 
    ggplot(aes(x=title_str, y=Number_of_Occurences)) +
    geom_bar(stat='identity') +
-   coord_flip()
-
+   coord_flip()+
+   ggtitle("Najczesciej wystepujace imiona meskie")+
+   xlab("Imiona") + ylab("Ilosc wystapien") +
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))
 ```
 
-Wnioski jakieś
-
+Najczęściej występującym imieniem męskim jest John. Na drugim miejscu plasuje się David, a następnie Michael.
 
 Wykres najpopularniejszych imion żeńskich
 ```{r}
 namesOccurencek %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences)) %>% 
    ggplot(aes(x=title_str, y=Number_of_Occurences)) +
    geom_bar(stat='identity') +
-   coord_flip()
-
-
+   coord_flip()+
+   ggtitle("Najczesciej wystepujace imiona meskie")+
+   xlab("Imiona") + ylab("Ilosc wystapien")+
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.title.x = element_text( face="bold"))+
+   theme(axis.title.y= element_text( face="bold"))
 ```
 
-Wnioski jakieś 
+Najpopularniejsze imiona żeńskie w wybranym zbiorze danych to Jennifer, Sarah Elizabeth oraz Rachel.
 
 Wykres ilości kobiet w danej grupie
 ```{r}
 
 imionazenskie %>% group_by(group) %>% summarise(ilosc = n()) %>% ggplot(aes(x=group, y=ilosc)) + geom_col() + 
-   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + xlab("")+
-   ylab("Ilosc")  +  ggtitle("Ilosc kobiet w danej grupie") + theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = )) + scale_y_continuous(breaks = seq(from = 0, to = 600,by =40 )) 
-
-
-
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + xlab("Ilosc")+
+   ylab("Ilosc")  +  ggtitle("Udzial danej grupy wsrod kobiet") + theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = )) + scale_y_continuous(breaks = seq(from = 0, to = 600,by =40 )) 
 ```
 
-Wnioski jakieś
+Wśród kobiet najczęściej występującą grupą jest aktorstwo oraz media.
 
 Wykres ilości mężczyzn w danej grupie
 ```{r}
 imionameskie %>% group_by(group) %>% summarise(ilosc = n()) %>% ggplot(aes(x=group, y=ilosc)) + geom_col() + 
-   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + xlab("")+
-   ylab("Ilosc") +  ggtitle("Ilosc mezczyzn w danej grupie") + theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = )) + scale_y_continuous(breaks = seq(from = 0, to = 600,by =40 )) 
-
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + xlab("Ilosc")+
+   ylab("Ilosc") +  ggtitle("Udzial danej grupy wsrod mezczyzn") + theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = )) + scale_y_continuous(breaks = seq(from = 0, to = 600,by =40 )) 
 ```
 
-Wnioski jakieś 
+Analogicznie wygląda sytuacja wśród mężczyzn, chociaż u nich udział grupy "Media" jest znacznie większy.
+Ogólna liczba wywiadów z udziałem mężczyzn jest również dużo większa.
 
 Wykres kobiet w danej grupie w określonej porze roku
 ```{r}
-ggplot(imionazenskie, aes(x=group)) + geom_bar() + facet_wrap(~season) + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +xlab("") + ylab("")
-
+ggplot(imionazenskie, aes(x=group)) + geom_bar() + 
+   facet_wrap(~season) + ggtitle("Ilosc wywiadow w poszczegolnych porach roku wsrod kobiet") + 
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+   xlab("") + ylab("Ilosc")
 ```
 
-Wnioski jakieś
+Procentowy udział poszczególnych grup w różnych porach roku jest raczej podobny. Można zatem wywnioskować, iż pora roku nie wpływa na popularność danej grupy społecznej wśród widzów.
 
 Wykres mężczyzn w danej grupie w określonej porze roku
 ```{r}
-ggplot(imionameskie, aes(x=group)) + geom_bar() + facet_wrap(~season) + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +xlab("") + ylab("")
-
+ggplot(imionameskie, aes(x=group)) + geom_bar() +
+   facet_wrap(~season) + ggtitle("Ilosc wywiadow w poszczegolnych porach roku wsrod mezczyzn") +
+   theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))+
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+   xlab("") + ylab("Ilosc")
 ```
 
-Wnioski jakieś 
-
+Wśród mężczyzn ta sytuacja wygląda podobnie.
 
 Wykres różnych grup na przedziale lat
 ```{r}
@@ -350,14 +366,15 @@ ggplot(df, aes(fill=group, x=year, y=ilosc)) +
    ylab("Ilosc") + 
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5,  face= 'bold', margin = ))+
-   theme(axis.title.x = element_text( face="bold"))+
-   theme(axis.title.y= element_text( face="bold")) 
-
+   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+   theme(axis.title.y= element_text( face="bold"))
 ```
+
+Od 1999 roku udział osób zajmujących się aktorstwem raczej malał na rzecz osób z grupy "Media". Ogólna ilość wywiadów jednak pozostawała raczej niezmienna.
+Niewielki wyjątek miał miejsce w 2007 roku, gdy to ogólna liczba wywiadów znacznie zmalała. W roku 2015 przeprowadzono najmniejszą liczbę wywiadów, jednak było to spowodowane zakończeniem zbierania danych w trzecim kwartale roku.
 
 
 ## Ilość wywiadów na przestrzeni miesiąca
-
 
 ```{r}
 frequency <- guests %>% group_by(day) %>% tally()
@@ -374,20 +391,15 @@ frequency %>% ggplot(aes(x=day, y=n)) + geom_bar(stat = 'identity')+geom_smooth(
    theme(axis.title.y= element_text( face="bold"))
 ```
 
-
 Ze względu na ilość dni w różnych miesiącach usnięto 31 pierwszy dzień, ponieważ sztucznie zaniżałby on ostatnie wskazanie na wykresie.
 Co prawda luty posiada 28 lub 29 dni, jednak jest to jedyny taki miesiąc w roku, dlatego ustawiony przedział wynosi 30 dni.
 
 Z wykresu wynika, że większość wywiadów jest przeprowadzana w pierwszych 20 dniach miesiąca. 
 
 
-
 ## Ilość wywiadów na przestrzeni tygodnia
 
-
 Dzięki wykorzystaniu funkcji z pakietu Lubridate mogły zostać określone poszczególne dni tygodnia w jakich przeprowadzane były wywiady.
-
-
 ```{r}
 interviewDate <- daily_show_guests
 interviewDate <- interviewDate %>% add_column(guests$month, guests$day)
@@ -411,15 +423,11 @@ topDay <- topDay[match(orderDays, topDay$weekDay),]
 topDay
 ```
 
-
 Na podstawie powyższych danych można zauważyć, że wywiady w piątki i niedziele to prawdziwa rzadkość. W niedzielę miał miejsce tylko jeden wywiad.
 Ciekawy jest również fakt, iż żaden z wywiadów nie został przeprowadzony w sobotę.
 
 
-
 ## Ilość wywiadów w poszczególnych miesiącach
-
-
 
 ```{r}
 monthlyFrequency <- interviewDate %>% group_by(month) %>% tally()
@@ -432,14 +440,10 @@ monthlyFrequency %>% ggplot(aes(x=month, y=n)) + geom_bar(stat = 'identity') +
    theme(axis.title.y= element_text( face="bold"))
 ```
 
-
 Na podstawie powyższego wykresu można zauważyć, że pod koniec roku przeprowadzana jest mniejsza ilość wywiadów.
 
 
-
 ## Ilość wywiadów w poszczególnych latach
-
-
 
 ```{r}
 yearFrequency <- interviewDate %>% group_by(year) %>% tally()
@@ -452,15 +456,11 @@ yearFrequency %>% ggplot(aes(x=year, y=n)) + geom_bar(stat = 'identity') +
    theme(axis.title.y= element_text( face="bold"))
 ```
 
-
 Na podstawie powyższego wykresu można zauważyć, że w roku 2015 przeprowadzono zdecydowanie mniej wywiadów. Jako że jest to ostatni rok uwzględniony w zbiorze danych można spodziewać się, że zbieranie danych zostało przerwane nie wraz z końcem roku, a w jego trakcie.
 Zostało to sprawdzone w trakcie wykonywania projektu - ostatni wywiad odbył się 5 sierpnia 2015 roku, co potwierdza powyższe przypuszczenia.
 
 
-
 ## Ilość wywiadów w przeciągu roku
-
-
 
 ```{r}
 allFrequency <- interviewDate %>% group_by(dayInYear) %>% tally()
@@ -476,7 +476,6 @@ allFrequency %>% ggplot(aes(x=dayInYear, y=n)) + geom_point() + geom_line(data =
    theme(axis.title.y= element_text( face="bold"))
 ```
 
-
 Jeśli w danym dniu przeprowadzane są wywiady, to zazwyczaj jest ich 7-10 dziennie. 
 Kilkukrotnie w ciągu roku można zaobserwować większe spadki. Po wyliczeniu numeru dnia okazuje się, że spadki występują:
 <ul>
@@ -491,13 +490,15 @@ Po porównaniu tych dat, okazuje się, że pokrywają one się w dużej mierze z
 
 Podczas liczenia numeru dnia w roku został uwzględniony 29 luty.
 
-<br/>
-<br/>
-
  
 ## Wnioski
 
-Na podstawie powyższych danych można przypusczać, że wywiady zostały przeprowadzane w Stanach Zjednoczonych. Oczywiście można to sprawdzić bezpośrednio wyszukując informacje o zbiorze daily_show_guests. 
-Ciekawy jest jednak fakt, iż można się tego dowiedzieć nie mając wiedzy skąd dane pochodzą.   
+Na podstawie powyższych danych można przypuszczać, że wywiady zostały przeprowadzane w Stanach Zjednoczonych. Oczywiście można to sprawdzić bezpośrednio wyszukując informacje o zbiorze daily_show_guests. 
+Ciekawy jest jednak fakt, iż można się tego dowiedzieć nie mając wiedzy skąd dane pochodzą.
 
- 
+Największym problemem było rzetelne podzielenie osób według ich imion. W tym celu do projektu zostały dodane dwa pliki tekstowe zawierające imiona męskie i żeńskie, dzięki czemu można było sprawdzić, do jakiej grupy należy przyporządkować konkretną osobę.
+
+Początkowo ciężko było wyłuskać większą ilość sensownych informacji z tak skąpego zbioru danych. Znajdowały się w nim wyłącznie daty wywiadów, imiona i nazwiska osób biorących w nich udział, zawód i grupę do jakiej dany zawód może być przypisany. Jednak w miarę postępów w projekcie, zauważaliśmy coraz więcej możliwych informacji do wyłuskania.
+Informacja o braku wywiadów w soboty oraz niewielkiej ilości wywiadów w piątki i niedziele była dla nas zaskoczeniem i dowiedzieliśmy się tego podczas analizy danych w zupełnie innym celu. Podobnie jak i powiązanie spadków ilości wywiadów w ciągu roku ze świętami w Stanach Zjednoczonych.
+
+Dalsza analiza danych mogła by się opierać o dodatkowe zbiory danych, posiadające więcej informacji o gościach programu. W takiej sytuacji możnaby analizować miejsca ich zamieszkania, daty urodzenia, czy stan cywilny.
