@@ -1,3 +1,5 @@
+#getwd()
+#setwd("C:/Users/Sosna/Desktop/II semestr/PJR/ProjektR/Analiza_daily_show_guests/")
 library(ggplot2)
 #For ddply
 library(plyr)
@@ -156,7 +158,6 @@ imionameskie<- imiona %>%
 namesOccurencem <- imionameskie %>% group_by(title_str) %>% tally() %>% rename(Number_of_Occurences = n)
 namesOccurencek <- imionazenskie %>% group_by(title_str) %>% tally() %>% rename(Number_of_Occurences = n)
 
-
 #Wybierze 20 najbardziej znanych. W przypadku kilku osÃ³b o takim samym wyniku zostana ne dodatkowo dobrane - w przypadku top_n(20,) wyswietli 24 osoby
 mostFamousm <- namesOccurencem %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences))
 mostFamousk <- namesOccurencek %>% top_n(20, Number_of_Occurences) %>% arrange(desc(Number_of_Occurences))
@@ -221,14 +222,14 @@ ggplot(df, aes(fill=group, x=year, y=ilosc)) +
    scale_x_continuous(breaks = c(1999,2000,2001,2002,2003,2004,
                                  2005,2006,2007,2008,2009,2010,2011,
                                  2012,2013,2014,2015)) + 
-   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
    ggtitle("Wystepowanie roznych grup na przedziale lat")+
    xlab("Rok")+
    ylab("Ilosc") + 
    theme_test() +
    theme(plot.title = element_text(size = 15, hjust=0.5,  face= 'bold', margin = ))+
    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-   theme(axis.title.y= element_text( face="bold")) 
+   theme(axis.title.x= element_text(face="bold")) +
+   theme(axis.title.y= element_text(face="bold"))
 
 
 ###########################################
@@ -314,7 +315,6 @@ allFrequency <- interviewDate %>% group_by(dayInYear) %>% tally()
 # allFrequency %>% ggplot(aes(x=dayInYear, y=n)) + geom_area() + 
 #    ggtitle("Czestotliwosc wywiadow na przestrzeni roku") + 
 #    theme(plot.title = element_text(size = 15, hjust=0.5, face= 'bold', margin = ))
-
 spline.d <- as.data.frame(spline(allFrequency$dayInYear, allFrequency$n))
 allFrequency %>% ggplot(aes(x=dayInYear, y=n)) + geom_point() + geom_line(data = spline.d, aes(x = x, y = y)) + 
    ggtitle("Czestotliwosc wywiadow na przestrzeni roku") + 
