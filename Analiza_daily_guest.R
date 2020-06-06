@@ -1,5 +1,3 @@
-#getwd()
-#setwd("C:/Users/Sosna/Desktop/II semestr/PJR/ProjektR/Analiza_daily_show_guests/")
 library(ggplot2)
 #For ddply
 library(plyr)
